@@ -6,6 +6,7 @@ import time
 import yaml
 import lxml.html
 import html
+import re
 
 class LibraRepBots:
     def __init__(self, projectID):
@@ -89,11 +90,27 @@ class LibraRepBots:
                 for irow in trdom.cssselect("td"):
                     td_val = irow.text
                     if td_val is None:
-                        row_text += ","
+                        if self.is_including_tag(irow) is True:
+                            row_text += self.get_regx_text(irow) + ","
+                        else:
+                            row_text += ","
                     else:
                         row_text += td_val.strip() + ","
+                print(row_text)
                 datas.append(row_text)
         return datas
+    
+    def is_including_tag(self, elm):
+        tag_str = html.unescape(lxml.html.tostring(elm).decode())
+        if re.search(r'<td.*?>(.+?)</td>', tag_str.strip(), re.DOTALL):
+            return True
+        else:
+            return False
+
+    def get_regx_text(self, elm):
+        tag_str = html.unescape(lxml.html.tostring(elm).decode())
+        tag_str = re.sub(r'(\r|\n|\r\n|\t|\s{2,})', "", tag_str)
+        return re.search(r'<td.*?>(.+\!*?)</td>', tag_str.strip(), re.DOTALL).group(1)
 
     def open_text_data(self, filename):
         line = []
@@ -131,11 +148,12 @@ class LibraRepBotsUtil(LibraRepBots):
 
 args = sys.argv
 projectID = args[1]
+techID = args[2]
 lbt = LibraRepBotsUtil(projectID)
 time.sleep(lbt.shortWait)
 lbt.login()
 time.sleep(lbt.shortWait)
-lbt.fetch_report_sequential(["7.1.1.1"])
+lbt.fetch_report_sequential([techID])
 time.sleep(lbt.shortWait)
 lbt.logout
 time.sleep(lbt.shortWait)
