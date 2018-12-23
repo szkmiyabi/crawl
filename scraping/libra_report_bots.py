@@ -73,16 +73,43 @@ class LibraRepBots:
             datas.append(td_val)
         return datas
     
+    def get_detail_table_data(self, pageID):
+        datas = []
+        dom = self.get_dom()
+        tbl = dom.xpath("/html/body/div[2]/div[2]/table")[0]
+        cnt = 0
+        for row in tbl.cssselect("tr"):
+            cnt += 1
+            if cnt < 2:
+                pass
+            else:
+                tr = html.unescape(lxml.html.tostring(row).decode())
+                trdom = lxml.html.fromstring(tr)
+                row_text = pageID + ","
+                for irow in trdom.cssselect("td"):
+                    td_val = irow.text
+                    if td_val is None:
+                        row_text += ","
+                    else:
+                        row_text += td_val.strip() + ","
+                datas.append(row_text)
+        return datas
+
     def open_text_data(self, filename):
         line = []
         with open(filename) as f:
             line = [s.strip() for s in f.readlines()]
         return line
+    
+    def save_text(self, text_data):
+        with open(self.fetch_filename_from_datetime(".txt"), "w") as f:
+            f.write(text_data)
 
 
 class LibraRepBotsUtil(LibraRepBots):
 
     def fetch_report_sequential(self, guideline_arr):
+        result_text = ""
         self.wd.get(self.rep_index_url_base + self.projectID + "/")
         if guideline_arr is None:
             guideline_rows = self.open_text_data(self.guideline_filename)
@@ -95,7 +122,10 @@ class LibraRepBotsUtil(LibraRepBots):
                 path = self.fetch_report_detail_path(pageID, guideline)
                 self.wd.get(path)
                 time.sleep(self.shortWait)
-                self.save_sc(pageID + "_" + guideline + ".png")
+                for line in self.get_detail_table_data(pageID):
+                    result_text += line + "\n"
+                #self.save_sc(pageID + "_" + guideline + ".png")
+        self.save_text(result_text)
 
     
 
