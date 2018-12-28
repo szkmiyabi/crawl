@@ -137,7 +137,7 @@ class CSSReportBots:
         return re.sub(r'(\r\n|\r|\n|\s{2,})', "", cr_text)
 
     def is_exist_import_css(self, cr_text):
-        if re.search(r'@import url.+?;', cr_text, re.DOTALL):
+        if re.search(r'@import .+?;', cr_text, re.DOTALL):
             return True
         else:
             return False
@@ -145,10 +145,18 @@ class CSSReportBots:
     def get_import_css_list(self, cr_css_url, cr_text):
         datas = []
         domain = self.get_domain(cr_css_url)
-        for partial_code in re.findall(r'@import url\("*.+?"*\);', cr_text, re.DOTALL):
-            mt = re.search(r'(@import url\("*)(.+?)("*\);)', partial_code, re.DOTALL).group(2)
-            print(mt)
-            datas.append(domain + mt)
+        pt1 = re.compile(r'@import url\(*"*.+?"*\)*;', re.DOTALL)
+        pt2 = re.compile(r'@import .+?;', re.DOTALL)
+        if pt1.search(cr_text) is not None:
+            for partial_code in re.findall(r'@import url\(*"*.+?"*\)*;', cr_text, re.DOTALL):
+                mt = re.search(r'(@import url\(*"*)(.+?)("*\)*;)', partial_code, re.DOTALL).group(2)
+                print(mt)
+                datas.append(domain + mt)
+        elif pt2.search(cr_text) is not None:
+            for partial_code in re.findall(r'@import .+?;', cr_text, re.DOTALL):
+                mt = re.search(r'(@import ")(.+?)(";)', partial_code, re.DOTALL).group(2)
+                print(mt)
+                datas.append(domain + mt)
         return datas
 
     def get_domain(self, cr_url):
@@ -270,6 +278,8 @@ class CSSReportBots:
             parent_datas.append(res_data)
         self.save_as_xlsx(parent_datas)
 
-app = CSSReportBots("urls.txt")
+args = sys.argv
+urls_filename = args[1]
+app = CSSReportBots(urls_filename)
 app.exec()
         
