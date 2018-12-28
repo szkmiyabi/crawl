@@ -3,7 +3,9 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from subprocess import Popen, PIPE
 import time
+import os
 from os.path import expanduser
+import datetime
 
 class FontViewBots:
     def __init__(self, projectID, urls_filename):
@@ -49,16 +51,31 @@ class FontViewBots:
                 datas.append({"pid": cols[0], "url": cols[1]})
         return datas
 
+    def get_uniq_file_name(self, ext_str):
+        datetime_fmt = datetime.datetime.today()
+        return datetime_fmt.strftime("%Y-%m-%d_%H-%M-%S") + ext_str
+
+    def get_uniq_dir_name(self):
+        datetime_fmt = datetime.datetime.today()
+        return datetime_fmt.strftime("%Y%m%d-%H%M%S") 
+    
+    def get_save_directory(self):
+        save_path = self.projectID + "-" + self.get_uniq_dir_name()
+        os.makedirs(save_path + "/firefox", exist_ok=True)
+        os.makedirs(save_path + "/chrome", exist_ok=True)
+        return save_path + "/"
+
     def exec(self):
+        save_path = self.get_save_directory()
         fxwd = self.open_fx_wd()
         fxwd.get("https://www.google.co.jp/")
-        fxwd.save_screenshot(self.projectID + "-firefox-capture.png")
+        fxwd.save_screenshot(save_path + "/firefox/capture.png")
         time.sleep(self.shortWait)
         self.close_wd(fxwd)
 
         chwd = self.open_ch_wd()
         chwd.get("https://www.google.co.jp/")
-        chwd.save_screenshot(self.projectID + "-chrome-capture.png")
+        chwd.save_screenshot(save_path + "/chrome/capture.png")
         time.sleep(self.shortWait)
         self.close_wd(chwd)
 
