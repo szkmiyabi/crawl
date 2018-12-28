@@ -21,6 +21,7 @@ class LibraRepBots:
             self.midWait = userdata["midWait"]
             self.shortWait = userdata["shortWait"]
             self.hrefFlag = userdata["hrefFlag"]
+            self.maxRows = userdata["maxRows"]
         self.app_url = "https://accessibility.jp/libra/"
         self.index_url = "https://jis.infocreate.co.jp/"
         self.rep_index_url_base = "http://jis.infocreate.co.jp/diagnose/indexv2/report/projID/"
@@ -76,9 +77,15 @@ class LibraRepBots:
         datas = []
         dom = self.get_dom()
         tbl = dom.xpath("/html/body/div[2]/div[1]/table")[0]
+        row_cnt = 0
         for row in tbl.cssselect("tr td:first-child"):
+            if self.maxRows > 0 and row_cnt == self.maxRows:
+                break
+            else:
+                pass
             td_val = row.text
             datas.append(td_val)
+            row_cnt += 1
         return datas
     
     def get_detail_table_data(self, pageID, guideline):
