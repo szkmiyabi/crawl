@@ -6,11 +6,13 @@ import time
 import os
 from os.path import expanduser
 import datetime
+import sys
 
 class FontViewBots:
-    def __init__(self, projectID, urls_filename):
+    def __init__(self, projectID, urls_filename, headless_flag=False):
         self.projectID = projectID
         self.urls_filename = urls_filename
+        self.headless_flag = headless_flag
         self.shortWait = 1
         self.midWait = 3
         self.longWait = 10
@@ -24,6 +26,10 @@ class FontViewBots:
         profile_dir = self.user_dir + '/.mozilla/firefox/'
         profile_fname = Popen('cat "$HOME/.mozilla/firefox/profiles.ini" | sed -n -e \'s/^.*Path=//p\' | head -n 1', shell=True, stdout=PIPE).communicate()[0].decode().strip()
         options.profile = profile_dir + profile_fname
+        if self.headless_flag is True:
+            options.add_argument('-headless')
+        else:
+            pass
         return options
     
     def get_ch_options(self):
@@ -31,6 +37,10 @@ class FontViewBots:
         options.binary_location = self.ch_path
         profile_dir = '--user-data-dir=' +self. user_dir + '/.google'
         options.add_argument(profile_dir)
+        if self.headless_flag is True:
+            options.add_argument('--headless')
+        else:
+            pass
         return options
     
     def open_fx_wd(self):
@@ -64,20 +74,52 @@ class FontViewBots:
         os.makedirs(save_path + "/firefox", exist_ok=True)
         os.makedirs(save_path + "/chrome", exist_ok=True)
         return save_path + "/"
+    
+    def  fullpage_screenshot(self, driver, path):
+        original_size = driver.get_window_size()
+        required_width = driver.execute_script('return document.body.parentNode.scrollWidth')
+        required_height = driver.execute_script('return document.body.parentNode.scrollHeight')
+        driver.set_window_size(required_width, required_height)
+        # driver.save_screenshot(path)  # has scrollbar
+        driver.find_element_by_tag_name('body').screenshot(path)  # avoids scrollbar
+        driver.set_window_size(original_size['width'], original_size['height'])
 
     def exec(self):
+        datas = self.load_url_datas()
         save_path = self.get_save_directory()
         fxwd = self.open_fx_wd()
-        fxwd.get("https://www.google.co.jp/")
-        fxwd.save_screenshot(save_path + "/firefox/capture.png")
-        time.sleep(self.shortWait)
+        for r in datas:
+            pid = r["pid"]
+            url = r["url"]
+            print("firefox: ", pid, " を処理しています。")
+            fxwd.get(url)
+            time.sleep(self.shortWait)
+            self.fullpage_screenshot(fxwd, save_path + "/firefox/fx_" + pid + ".png")
         self.close_wd(fxwd)
-
         chwd = self.open_ch_wd()
-        chwd.get("https://www.google.co.jp/")
-        chwd.save_screenshot(save_path + "/chrome/capture.png")
-        time.sleep(self.shortWait)
+        for r in datas:
+            pid = r["pid"]
+            url = r["url"]
+            print("chrome:  ", pid, " を処理しています。")
+            chwd.get(url)
+            time.sleep(self.shortWait)
+            self.fullpage_screenshot(chwd, save_path + "/chrome/ch_" + pid + ".png")
         self.close_wd(chwd)
+    
+"""
+--- 使い方 ---
+１．準備
+# Firefoxを起動しデフォルトフォントサイズを16ptから32ptに変更する
+# Chromeを以下のコマンドで起動しデフォルトフォントサイズを16ptから32ptに変更する
+    $ google-chrome --user-data-dir=/home/vagrant/.google
 
-app = FontViewBots("474", "test")
+2. 実行
+# 以下のコマンドを実行する
+    $ python font_view_bots.py [プロジェクト番号] [URLファイル名]
+"""
+
+args = sys.argv
+projectID = args[1]
+urls_filename = args[2]
+app = FontViewBots(projectID, urls_filename)
 app.exec()
