@@ -7,6 +7,8 @@ import os
 from os.path import expanduser
 import datetime
 import sys
+import argparse
+import textwrap
 
 class FontViewBots:
     def __init__(self, projectID, urls_filename, headless_flag=False):
@@ -105,21 +107,24 @@ class FontViewBots:
             time.sleep(self.shortWait)
             self.fullpage_screenshot(chwd, save_path + "/chrome/ch_" + pid + ".png")
         self.close_wd(chwd)
-    
-"""
---- 使い方 ---
-１．準備
-# Firefoxを起動しデフォルトフォントサイズを16ptから32ptに変更する
-# Chromeを以下のコマンドで起動しデフォルトフォントサイズを16ptから32ptに変更する
-    $ google-chrome --user-data-dir=/home/vagrant/.google
 
-2. 実行
-# 以下のコマンドを実行する
-    $ python font_view_bots.py [プロジェクト番号] [URLファイル名]
-"""
 
-args = sys.argv
-projectID = args[1]
-urls_filename = args[2]
+params = argparse.ArgumentParser(
+    usage='%(prog)s [arg1] [arg2]',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog=textwrap.dedent('''
+        note:
+        始めに以下の設定を行うこと
+        # Firefoxを起動しデフォルトフォントサイズを16ptから32ptに変更する
+        # Chromeを以下のコマンドで起動しデフォルトフォントサイズを16ptから32ptに変更する
+        $ google-chrome --user-data-dir=/home/vagrant/.google
+    ''')
+)
+params.add_argument('arg1', help='input the projectID')
+params.add_argument('arg2', help='input the URLs file name')
+args = params.parse_args()
+
+projectID = args.arg1
+urls_filename = args.arg2
 app = FontViewBots(projectID, urls_filename)
 app.exec()
