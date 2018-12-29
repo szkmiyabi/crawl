@@ -7,6 +7,7 @@ import html
 import sys
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
+import argparse
 
 class CSSReportBots:
     def __init__(self, urls_filename):
@@ -278,8 +279,12 @@ class CSSReportBots:
             parent_datas.append(res_data)
         self.save_as_xlsx(parent_datas)
 
-args = sys.argv
-urls_filename = args[1]
+
+params = argparse.ArgumentParser(usage='%(prog)s [arg1]')
+params.add_argument('arg1', help='input the URLs file name')
+args = params.parse_args()
+
+urls_filename = args.arg1
 app = CSSReportBots(urls_filename)
 app.exec()
         
