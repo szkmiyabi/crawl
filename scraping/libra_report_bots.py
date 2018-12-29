@@ -9,6 +9,7 @@ import html
 import re
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
+import argparse
 
 class LibraRepBots:
     def __init__(self, projectID):
@@ -21,13 +22,14 @@ class LibraRepBots:
             self.midWait = userdata["midWait"]
             self.shortWait = userdata["shortWait"]
             self.hrefFlag = userdata["hrefFlag"]
+            self.guideline_filename = userdata["guideline_filename"]
+            self.pageID_filename = userdata["pageID_filename"]
             self.maxRows = userdata["maxRows"]
         self.app_url = "https://accessibility.jp/libra/"
         self.index_url = "https://jis.infocreate.co.jp/"
         self.rep_index_url_base = "http://jis.infocreate.co.jp/diagnose/indexv2/report/projID/"
         self.rep_detail_url_base = "http://jis.infocreate.co.jp/diagnose/indexv2/report2/projID/"
         self.sv_mainpage_url_base = "http://jis.infocreate.co.jp/diagnose/indexv2/index/projID/"
-        self.guideline_filename = "guideline_datas.txt"
         self.projectID = projectID
         self.wd = webdriver.PhantomJS()
         self.wd.implicitly_wait(self.systemWait)
@@ -87,7 +89,7 @@ class LibraRepBots:
             datas.append(td_val)
             row_cnt += 1
         return datas
-    
+
     def get_detail_table_data(self, pageID, guideline):
         datas = []
         dom = self.get_dom()
@@ -187,7 +189,14 @@ class LibraRepBots:
             ws.cell(row=1, column=i).font = Font(bold=True)
             ws.cell(row=1, column=i).alignment = Alignment(horizontal="center")
         wb.save(self.fetch_filename_from_datetime(".xlsx"))
-
+    
+    def get_add_header(self):
+        add_header = ""
+        if self.hrefFlag == "yes":
+            add_header = [["管理番号", "達成基準", "LibraURL", "状況/要件", "実装番号", "検査結果", "検査員", "コメント", "対象ソースコード", "修正ソースコード"]]
+        else:
+            add_header = [["管理番号", "達成基準", "状況/要件", "実装番号", "検査結果", "検査員", "コメント", "対象ソースコード", "修正ソースコード"]]
+        return add_header
 
 class LibraRepBotsUtil(LibraRepBots):
     def fetch_report_sequential(self, guideline_arr):
@@ -205,30 +214,53 @@ class LibraRepBotsUtil(LibraRepBots):
                 self.wd.get(path)
                 time.sleep(self.shortWait)
                 rep_data.extend(self.get_detail_table_data(pageID, guideline))
-        add_header = None
-        if self.hrefFlag == "yes":
-            add_header = [["管理番号", "達成基準", "LibraURL", "状況/要件", "実装番号", "検査結果", "検査員", "コメント", "対象ソースコード", "修正ソースコード"]]
-        else:
-            add_header = [["管理番号", "達成基準", "状況/要件", "実装番号", "検査結果", "検査員", "コメント", "対象ソースコード", "修正ソースコード"]]
-        last_rep_data = add_header + rep_data
+        last_rep_data = self.get_add_header() + rep_data
         self.save_xlsx(last_rep_data)
 
+    def fetch_report_single(self, guideline_arr, cr_page_arr):
+        rep_data = []
+        self.wd.get(self.rep_index_url_base + self.projectID + "/")
+        if guideline_arr is False:
+            guideline_rows = self.open_text_data(self.guideline_filename)
+        else:
+            guideline_rows = guideline_arr
+        if cr_page_arr is False:
+            page_rows = self.open_text_data(self.pageID_filename)
+        else:
+            page_rows = cr_page_arr
+        for guideline in guideline_rows:
+            for pageID in page_rows:
+                print(pageID, ",", guideline, "を処理しています。")
+                path = self.fetch_report_detail_path(pageID, guideline)
+                self.wd.get(path)
+                time.sleep(self.shortWait)
+                rep_data.extend(self.get_detail_table_data(pageID, guideline))
+        last_rep_data = self.get_add_header() + rep_data
+        self.save_xlsx(last_rep_data)
 
-args = sys.argv
-projectID = args[1]
-techID = None
-try:
-    techID = args[2]
-except IndexError:
-    pass
+params = argparse.ArgumentParser(usage='%(prog)s [arg1] [-g guidelineID] [-p pageID]')
+params.add_argument('arg1', help='input the projectID')
+params.add_argument('-g', help='if you need filtering by guideline, input the guidelineID')
+params.add_argument('-p', help='if you need filtering by page, input the pageID')
+args = params.parse_args()
+projectID = args.arg1
+guidelineID = args.g
+pageID = args.p
+
 lbt = LibraRepBotsUtil(projectID)
 time.sleep(lbt.shortWait)
 lbt.login()
 time.sleep(lbt.shortWait)
-if techID is None:
-    lbt.fetch_report_sequential(False)
+if guidelineID is None:
+    if pageID is None:
+        lbt.fetch_report_sequential(False)
+    else:
+        lbt.fetch_report_single(False, [pageID])
 else:
-    lbt.fetch_report_sequential([techID])
+    if pageID is None:
+        lbt.fetch_report_sequential([guidelineID])
+    else:
+        lbt.fetch_report_single([guidelineID], [pageID])
 time.sleep(lbt.shortWait)
 lbt.logout
 time.sleep(lbt.shortWait)
