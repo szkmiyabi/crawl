@@ -92,39 +92,6 @@ class FontViewBots:
             driver.find_element_by_tag_name('body').screenshot(path)
             driver.set_window_size(original_size['width'], original_size['height'])
 
-    def exec_firefox(self, datas, save_path):
-        fxwd = self.open_fx_wd()
-        for r in datas:
-            pid = r["pid"]
-            url = r["url"]
-            print("firefox: ", pid, " を処理しています。")
-            fxwd.get(url)
-            time.sleep(self.shortWait)
-            self.fullpage_screenshot("firefox", fxwd, save_path + "/firefox/fx_" + pid + ".png")
-        self.close_wd(fxwd)
-
-    def exec_chrome(self, datas, save_path):
-        chwd = self.open_ch_wd()
-        for r in datas:
-            pid = r["pid"]
-            url = r["url"]
-            print("chrome:  ", pid, " を処理しています。")
-            chwd.get(url)
-            time.sleep(self.shortWait)
-            self.fullpage_screenshot("chrome", chwd, save_path + "/chrome/ch_" + pid + ".png")
-        self.close_wd(chwd)
-
-    def exec(self, browser_name):
-        datas = self.load_url_datas()
-        save_path = self.get_save_directory()
-        if self.operation_flag == "all":
-            self.exec_firefox(datas, save_path)
-            self.exec_chrome(datas, save_path)
-        elif self.operation_flag == "firefox":
-            self.exec_firefox(datas, save_path)
-        elif self.operation_flag == "chrome":
-            self.exec_chrome(datas, save_path)
-
     def extends_save_screenshot(self, wd, filename):
         filepath = '/'.join(filename.split('/')[:-1])
         tmpdirpath = filepath + "/tmp"
@@ -177,6 +144,39 @@ class FontViewBots:
         stitched_image.save(filename)
         shutil.rmtree(tmpdirpath)
         print("一時ディレクトリ:", tmpdirpath, " を削除しました。")
+
+    def exec_firefox(self, datas, save_path):
+        fxwd = self.open_fx_wd()
+        for r in datas:
+            pid = r["pid"]
+            url = r["url"]
+            print("firefox: ", pid, " を処理しています。")
+            fxwd.get(url)
+            time.sleep(self.shortWait)
+            self.fullpage_screenshot("firefox", fxwd, save_path + "/firefox/fx_" + pid + ".png")
+        self.close_wd(fxwd)
+
+    def exec_chrome(self, datas, save_path):
+        chwd = self.open_ch_wd()
+        for r in datas:
+            pid = r["pid"]
+            url = r["url"]
+            print("chrome:  ", pid, " を処理しています。")
+            chwd.get(url)
+            time.sleep(self.shortWait)
+            self.fullpage_screenshot("chrome", chwd, save_path + "/chrome/ch_" + pid + ".png")
+        self.close_wd(chwd)
+
+    def exec(self):
+        datas = self.load_url_datas()
+        save_path = self.get_save_directory()
+        if self.operation_flag == "all":
+            self.exec_firefox(datas, save_path)
+            self.exec_chrome(datas, save_path)
+        elif self.operation_flag == "firefox":
+            self.exec_firefox(datas, save_path)
+        elif self.operation_flag == "chrome":
+            self.exec_chrome(datas, save_path)
 
 
 params = argparse.ArgumentParser(
