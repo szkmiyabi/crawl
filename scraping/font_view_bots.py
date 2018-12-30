@@ -77,8 +77,9 @@ class FontViewBots:
     
     def get_save_directory(self):
         save_path = self.projectID + "-" + self.get_uniq_dir_name()
-        os.makedirs(save_path + "/firefox", exist_ok=True)
-        os.makedirs(save_path + "/chrome", exist_ok=True)
+            os.makedirs(save_path + "/firefox", exist_ok=True)
+        if self.operation_flag == "all" or self.operation_flag == "chrome":
+            os.makedirs(save_path + "/chrome", exist_ok=True)
         return save_path + "/"
     
     def  fullpage_screenshot(self, browser_name, driver, path):
