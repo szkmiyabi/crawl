@@ -113,7 +113,7 @@ class FontViewBots:
         self.close_wd(chwd)
 
     def extends_save_screenshot(self, wd, filename):
-        file_path = '/'.join(filename.split('/')[:-1])
+        filepath = '/'.join(filename.split('/')[:-1])
         wd.execute_script("window.scrollTo(0, 0);")
         total_width = wd.execute_script("return document.body.scrollWidth")
         total_height = wd.execute_script("return document.body.scrollHeight")
@@ -132,7 +132,7 @@ class FontViewBots:
 
             while scroll_width < total_width:
                 if col_count > 0:
-                    wd.execute_script("window.scrollBy(" + str(view_width) + ", 0")
+                    wd.execute_script("window.scrollBy(" + str(view_width) + ", 0)")
                 tmpname = filepath + '/tmp_%d_%d.png' % (row_count, col_count)
                 wd.save_screenshot(tmpname)
                 time.sleep(self.systemWait)
