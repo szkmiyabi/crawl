@@ -81,6 +81,7 @@ class FontViewBots:
         original_size = driver.get_window_size()
         required_width = driver.execute_script('return document.body.parentNode.scrollWidth')
         required_height = driver.execute_script('return document.body.parentNode.scrollHeight')
+        print("width=", required_width, "height=", required_height)
         driver.set_window_size(required_width, required_height)
         # driver.save_screenshot(path)  # has scrollbar
         driver.find_element_by_tag_name('body').screenshot(path)  # avoids scrollbar
