@@ -16,6 +16,7 @@ class FontViewBots:
         self.projectID = projectID
         self.urls_filename = urls_filename
         self.headless_flag = headless_flag
+        self.systemWait = 3
         self.shortWait = 1
         self.midWait = 3
         self.longWait = 10
