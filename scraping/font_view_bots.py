@@ -10,19 +10,20 @@ import sys
 import argparse
 import textwrap
 from PIL import Image
+import shutil
 
 class FontViewBots:
     def __init__(self, projectID, urls_filename, headless_flag=False):
         self.projectID = projectID
         self.urls_filename = urls_filename
         self.headless_flag = headless_flag
-        self.systemWait = 3
         self.shortWait = 1
         self.midWait = 3
         self.longWait = 10
         self.user_dir = expanduser('~')
         self.fx_path = '/usr/bin/firefox'
         self.ch_path = '/usr/bin/google-chrome'
+        self.extends_screenshot_wait = 3
 
     def get_fx_options(self):
         options = FirefoxOptions()
@@ -86,7 +87,6 @@ class FontViewBots:
             original_size = driver.get_window_size()
             required_width = driver.execute_script('return document.body.parentNode.scrollWidth')
             required_height = driver.execute_script('return document.body.parentNode.scrollHeight')
-            print("width=", required_width, "height=", required_height)
             driver.set_window_size(required_width, required_height)
             driver.find_element_by_tag_name('body').screenshot(path)
             driver.set_window_size(original_size['width'], original_size['height'])
@@ -115,6 +115,7 @@ class FontViewBots:
 
     def extends_save_screenshot(self, wd, filename):
         filepath = '/'.join(filename.split('/')[:-1])
+        delpath = filepath + "/tmp"
         wd.execute_script("window.scrollTo(0, 0);")
         total_width = wd.execute_script("return document.body.scrollWidth")
         total_height = wd.execute_script("return document.body.scrollHeight")
@@ -134,9 +135,10 @@ class FontViewBots:
             while scroll_width < total_width:
                 if col_count > 0:
                     wd.execute_script("window.scrollBy(" + str(view_width) + ", 0)")
-                tmpname = filepath + '/tmp_%d_%d.png' % (row_count, col_count)
+                tmpname = filepath + '/tmp/tmp_%d_%d.png' % (row_count, col_count)
                 wd.save_screenshot(tmpname)
-                time.sleep(self.systemWait)
+                print(tmpname, "を一時的に保存しました。")
+                time.sleep(self.extends_screenshot_wait)
 
                 if scroll_width + view_width >= total_width or scroll_height + view_height >= total_height:
                     new_width = view_width
@@ -156,9 +158,11 @@ class FontViewBots:
                     col_count += 1
 
             scroll_height += view_height
-            time.sleep(self.systemWait)
+            time.sleep(self.extends_screenshot_wait)
 
         stitched_image.save(filename)
+        shutil.rmtree(delpath)
+        print("一時ディレクトリ:", delpath, " を削除しました。")
 
 
 params = argparse.ArgumentParser(
