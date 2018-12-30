@@ -13,9 +13,10 @@ from PIL import Image
 import shutil
 
 class FontViewBots:
-    def __init__(self, projectID, urls_filename, headless_flag=False):
+    def __init__(self, projectID, urls_filename, operation_flag, headless_flag=False):
         self.projectID = projectID
         self.urls_filename = urls_filename
+        self.operation_flag = operation_flag
         self.headless_flag = headless_flag
         self.shortWait = 1
         self.midWait = 3
@@ -91,9 +92,7 @@ class FontViewBots:
             driver.find_element_by_tag_name('body').screenshot(path)
             driver.set_window_size(original_size['width'], original_size['height'])
 
-    def exec(self):
-        datas = self.load_url_datas()
-        save_path = self.get_save_directory()
+    def exec_firefox(self, datas, save_path):
         fxwd = self.open_fx_wd()
         for r in datas:
             pid = r["pid"]
@@ -103,6 +102,8 @@ class FontViewBots:
             time.sleep(self.shortWait)
             self.fullpage_screenshot("firefox", fxwd, save_path + "/firefox/fx_" + pid + ".png")
         self.close_wd(fxwd)
+
+    def exec_chrome(self, datas, save_path):
         chwd = self.open_ch_wd()
         for r in datas:
             pid = r["pid"]
@@ -113,11 +114,22 @@ class FontViewBots:
             self.fullpage_screenshot("chrome", chwd, save_path + "/chrome/ch_" + pid + ".png")
         self.close_wd(chwd)
 
+    def exec(self, browser_name):
+        datas = self.load_url_datas()
+        save_path = self.get_save_directory()
+        if self.operation_flag == "all":
+            self.exec_firefox(datas, save_path)
+            self.exec_chrome(datas, save_path)
+        elif self.operation_flag == "firefox":
+            self.exec_firefox(datas, save_path)
+        elif self.operation_flag == "chrome":
+            self.exec_chrome(datas, save_path)
+
     def extends_save_screenshot(self, wd, filename):
         filepath = '/'.join(filename.split('/')[:-1])
-        delpath = filepath + "/tmp"
-        os.makedirs(delpath)
-        print("一時ディレクトリ:", delpath, "を作成しました。")
+        tmpdirpath = filepath + "/tmp"
+        os.makedirs(tmpdirpath)
+        print("一時ディレクトリ:", tmpdirpath, "を作成しました。")
         wd.execute_script("window.scrollTo(0, 0);")
         total_width = wd.execute_script("return document.body.scrollWidth")
         total_height = wd.execute_script("return document.body.scrollHeight")
@@ -163,8 +175,8 @@ class FontViewBots:
             time.sleep(self.extends_screenshot_wait)
 
         stitched_image.save(filename)
-        shutil.rmtree(delpath)
-        print("一時ディレクトリ:", delpath, " を削除しました。")
+        shutil.rmtree(tmpdirpath)
+        print("一時ディレクトリ:", tmpdirpath, " を削除しました。")
 
 
 params = argparse.ArgumentParser(
@@ -180,9 +192,11 @@ params = argparse.ArgumentParser(
 )
 params.add_argument('arg1', help='input the projectID')
 params.add_argument('arg2', help='input the URLs file name')
+params.add_argument('arg3', help='choose value in [all,firefox,chrome]')
 args = params.parse_args()
 
 projectID = args.arg1
 urls_filename = args.arg2
-app = FontViewBots(projectID, urls_filename)
+operation_flag = args.arg3
+app = FontViewBots(projectID, urls_filename, operation_flag)
 app.exec()
