@@ -24,7 +24,7 @@ class FontViewBots:
         self.user_dir = expanduser('~')
         self.fx_path = '/usr/bin/firefox'
         self.ch_path = '/usr/bin/google-chrome'
-        self.extends_screenshot_wait = 3
+        self.extends_screenshot_wait = 1
 
     def get_fx_options(self):
         options = FirefoxOptions()
