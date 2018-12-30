@@ -9,6 +9,7 @@ import datetime
 import sys
 import argparse
 import textwrap
+from PIL import Image
 
 class FontViewBots:
     def __init__(self, projectID, urls_filename, headless_flag=False):
@@ -77,15 +78,17 @@ class FontViewBots:
         os.makedirs(save_path + "/chrome", exist_ok=True)
         return save_path + "/"
     
-    def  fullpage_screenshot(self, driver, path):
-        original_size = driver.get_window_size()
-        required_width = driver.execute_script('return document.body.parentNode.scrollWidth')
-        required_height = driver.execute_script('return document.body.parentNode.scrollHeight')
-        print("width=", required_width, "height=", required_height)
-        driver.set_window_size(required_width, required_height)
-        # driver.save_screenshot(path)  # has scrollbar
-        driver.find_element_by_tag_name('body').screenshot(path)  # avoids scrollbar
-        driver.set_window_size(original_size['width'], original_size['height'])
+    def  fullpage_screenshot(self, browser_name, driver, path):
+        if browser_name == "firefox":
+            self.extends_save_screenshot(driver, path)
+        elif browser_name == "chrome":
+            original_size = driver.get_window_size()
+            required_width = driver.execute_script('return document.body.parentNode.scrollWidth')
+            required_height = driver.execute_script('return document.body.parentNode.scrollHeight')
+            print("width=", required_width, "height=", required_height)
+            driver.set_window_size(required_width, required_height)
+            driver.find_element_by_tag_name('body').screenshot(path)
+            driver.set_window_size(original_size['width'], original_size['height'])
 
     def exec(self):
         datas = self.load_url_datas()
@@ -97,7 +100,7 @@ class FontViewBots:
             print("firefox: ", pid, " を処理しています。")
             fxwd.get(url)
             time.sleep(self.shortWait)
-            self.fullpage_screenshot(fxwd, save_path + "/firefox/fx_" + pid + ".png")
+            self.fullpage_screenshot("firefox", fxwd, save_path + "/firefox/fx_" + pid + ".png")
         self.close_wd(fxwd)
         chwd = self.open_ch_wd()
         for r in datas:
@@ -106,8 +109,55 @@ class FontViewBots:
             print("chrome:  ", pid, " を処理しています。")
             chwd.get(url)
             time.sleep(self.shortWait)
-            self.fullpage_screenshot(chwd, save_path + "/chrome/ch_" + pid + ".png")
+            self.fullpage_screenshot("chrome", chwd, save_path + "/chrome/ch_" + pid + ".png")
         self.close_wd(chwd)
+
+    def extends_save_screenshot(self, wd, filename):
+        file_path = '/'.join(filename.split('/')[:-1])
+        wd.execute_script("window.scrollTo(0, 0);")
+        total_width = wd.execute_script("return document.body.scrollWidth")
+        total_height = wd.execute_script("return document.body.scrollHeight")
+        view_width = wd.execute_script("return window.innerWidth")
+        view_height = wd.execute_script("return window.innerHeight")
+
+        stitched_image = Image.new("RGB", (total_width, total_height))
+        scroll_width = 0
+        scroll_height = 0
+        row_count = 0
+
+        while scroll_height < total_height:
+            col_count = 0
+            scroll_width = 0
+            wd.execute_script("window.scrollTo(%d, %d)" % (scroll_width, scroll_height))
+
+            while scroll_width < total_width:
+                if col_count > 0:
+                    wd.execute_script("window.scrollBy(" + str(view_width) + ", 0")
+                tmpname = filepath + '/tmp_%d_%d.png' % (row_count, col_count)
+                wd.save_screenshot(tmpname)
+                time.sleep(self.systemWait)
+
+                if scroll_width + view_width >= total_width or scroll_height + view_height >= total_height:
+                    new_width = view_width
+                    new_height = view_height
+                    if scroll_width + view_width >= total_width:
+                        new_width = total_width - scroll_width
+                    if scroll_height + view_height >= total_height:
+                        new_height = total_height - scroll_height
+                    tmp_image = Image.open(tmpname)
+                    tmp_image.crop((view_width - new_width, view_height - new_height, view_width, view_height)).save(tmpname)
+                    stitched_image.paste(Image.open(tmpname), (scroll_width, scroll_height))
+                    scroll_width += new_width
+
+                else:
+                    stitched_image.paste(Image.open(tmpname), (scroll_width, scroll_height))
+                    scroll_width += view_width
+                    col_count += 1
+
+            scroll_height += view_height
+            time.sleep(self.systemWait)
+
+        stitched_image.save(filename)
 
 
 params = argparse.ArgumentParser(
