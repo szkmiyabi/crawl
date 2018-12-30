@@ -116,6 +116,8 @@ class FontViewBots:
     def extends_save_screenshot(self, wd, filename):
         filepath = '/'.join(filename.split('/')[:-1])
         delpath = filepath + "/tmp"
+        os.makedirs(delpath)
+        print("一時ディレクトリ:", delpath, "を作成しました。")
         wd.execute_script("window.scrollTo(0, 0);")
         total_width = wd.execute_script("return document.body.scrollWidth")
         total_height = wd.execute_script("return document.body.scrollHeight")
