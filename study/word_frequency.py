@@ -20,7 +20,7 @@ def main():
                 tokens = get_tokens(tagger, content)
                 frequency.update(tokens)
                 count_processed += 1
-                if count_processed % 10000 == 0:
+                if count_processed % 1000 == 0:
                     print('{0} documents were processed.'.format(count_processed), file=sys.stderr)
     
     for token, count in frequency.most_common(30):
@@ -29,6 +29,7 @@ def main():
 def iter_docs(file):
 
     for line in file:
+        print(line)
         if line.startswith('<doc '):
             buffer = []
         elif line.startswith('</doc>'):
