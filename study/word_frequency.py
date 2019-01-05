@@ -7,7 +7,7 @@ import MeCab
 def main():
 
     input_dir = sys.argv[1]
-    tagger = MeCab.Tagger('')
+    tagger = MeCab.Tagger()
     tagger.parse('') # bug fix.
     frequency = Counter()
     count_processed = 0
