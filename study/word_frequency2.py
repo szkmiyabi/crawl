@@ -31,7 +31,7 @@ def main():
 
 def text_clean(content):
     txt = None
-    txt = re.sub(r'(\t|\s{3,}|\r\n{2,}|\n{2,})+', "", content, re.DOTALL)
+    txt = re.sub(r'(\t|\s{3,}|　{2,}|\r\n{2,}|\n{2,})+', "", content, re.DOTALL)
     return txt
 
 def get_tokens(tagger, content):
