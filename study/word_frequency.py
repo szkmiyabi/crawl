@@ -6,7 +6,7 @@ import MeCab
 
 def main():
 
-    inpurt_dir = sys.argv[1]
+    input_dir = sys.argv[1]
     tagger = MeCab.Tagger('')
     tagger.parse('') # bug fix.
     frequency = Counter()
@@ -17,7 +17,7 @@ def main():
 
         with open(path) as file:
             for content in iter_docs(file):
-                tokens = get_tokens(taggar, content)
+                tokens = get_tokens(tagger, content)
                 frequency.update(tokens)
                 count_processed += 1
                 if count_processed % 10000 == 0:
