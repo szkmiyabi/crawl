@@ -4,7 +4,7 @@ import re
 from glob import glob
 
 def text_clean(content):
-    pt1 = re.compile(r'^-+ Page.+', re.DOTALL)
+    pt1 = re.compile(r'-{2,} Page [0-9]+-{2,}', re.DOTALL)
     pt2 = re.compile(r'^\s+', re.DOTALL)
     pt3 = re.compile(r' +$', re.DOTALL)
     pt4 = re.compile(r'\s{2,}', re.DOTALL)
