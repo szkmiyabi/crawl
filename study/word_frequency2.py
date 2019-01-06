@@ -17,14 +17,19 @@ def main():
         print('Processing {0}...'.format(path), file=sys.stderr)
 
         with open(path) as file:
-            content = file.read()
-            tokens = get_tokens(tagger, content)
-            frequency.update(tokens)
-            count_processed += 1
-            print('{0} documents were processed.'.format(count_processed), file=sys.stderr)
+            #content = file.read()
+            for content in file.readlines():
+                tokens = get_tokens(tagger, content)
+                frequency.update(tokens)
+                count_processed += 1
+                print('{0} documents were processed.'.format(count_processed), file=sys.stderr)
     
+    with open("data.txt", "w") as f1:
+        pass
     for token, count in frequency.most_common():
         print(token, count)
+        with open("data.txt", "a") as f2:
+          f2.write(str(count) + "\t" + token)
 
 def get_tokens(tagger, content):
     tokens = []

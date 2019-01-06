@@ -7,11 +7,13 @@ def text_clean(content):
     pt1 = re.compile(r'-{2,} Page [0-9]+-{2,}', re.DOTALL)
     pt2 = re.compile(r'^ +', re.DOTALL)
     pt3 = re.compile(r' +$', re.DOTALL)
-    pt4 = re.compile(r'\s{2,}', re.DOTALL)
+    pt4 = re.compile(r' {2,}', re.DOTALL)
+    pt5 = re.compile(r'(\r\n|\r|\n){2,}', re.DOTALL)
     content = re.sub(pt1, "", content)
     content = re.sub(pt2, "", content)
     content = re.sub(pt3, "", content)
     content = re.sub(pt4, "", content)
+    content = re.sub(pt5, "\n", content)
     return content
 
 for path in glob(os.path.join("text", "*.txt")):
