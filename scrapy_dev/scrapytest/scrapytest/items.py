@@ -12,3 +12,7 @@ class ScrapytestItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
+
+class Headline(scrapy.Item):
+    title = scrapy.Field()
+    body = scrapy.Field()
