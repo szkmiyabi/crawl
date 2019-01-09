@@ -20,7 +20,7 @@ class BayBerryBots:
             self.passwd = userdata["pswd"]
             self.systemWait = userdata["systemWait"]
         self.auth = self.bsid +  ":" + self.bspswd + "@"
-        self.app_url = "http://" + self.auth + "183.176.243.154/cms/"
+        self.app_url = "http://183.176.243.154/cms/"
         self.user_dir = expanduser('~')
         self.ch_path = '/usr/bin/google-chrome'
         self.wd = webdriver.Chrome()
