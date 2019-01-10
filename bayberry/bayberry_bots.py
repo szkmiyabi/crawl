@@ -173,7 +173,8 @@ class BayBerryBots:
     def extends_save_screenshot(self, wd, filename):
         filepath = '/'.join(filename.split('/')[:-1])
         tmpdirpath = filepath + "/tmp"
-        os.makedirs(tmpdirpath)
+        if not os.path.exists(tmpdirpath):
+            os.makedirs(tmpdirpath)
         print("一時ディレクトリ:", tmpdirpath, "を作成しました。")
         wd.execute_script("window.scrollTo(0, 0);")
         total_width = wd.execute_script("return document.body.scrollWidth")
