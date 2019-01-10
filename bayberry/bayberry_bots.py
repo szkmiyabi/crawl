@@ -76,7 +76,7 @@ class BayBerryBots:
     def select_site(self):
         ddl = self.wd.find_element_by_id("site-groups")
         for opt in ddl.find_elements_by_tag_name("option"):
-            optval = opt.get("value")
+            optval = opt.get_attribute("value")
             opttxt = opt.text
             if optval == "1" and opttxt.strip() == "滋賀県ホームページ":
                 opt.click()
