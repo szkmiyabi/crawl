@@ -106,14 +106,26 @@ class BayBerryBots:
             })
         return datas
 
+    def load_articles_data(self):
+        datas = []
+        with open(self.articles_file, "r") as f:
+            line = [s.strip() for s in f.readlines()]
+            for r in line:
+                tmp = r.split("\t")
+                datas.append({
+                    "pid": tmp[0],
+                    "pname": tmp[1]
+                })
+        return datas
+
     def get_pageID(self, href_val):
         return re.search(r'\?id=(.+)', href_val).group(1)
     
     def preview_page_screen_shot(self, max_limit):
+        datas = self.load_articles_data()
         url_base = self.app_url + "article_pages/preview?id="
-        save_path = self.get_save_directory()
         cnt = 0
-        for row in self.fetch_articles_data():
+        for row in datas:
             if max_limit is not 0 and cnt > max_limit:
                 break
             pid = row["pid"]
@@ -121,7 +133,7 @@ class BayBerryBots:
             print(pid, " ", pname, " を処理しています。")
             self.wd.get(url_base + pid)
             time.sleep(self.shortWait)
-            self.fullpage_screenshot("firefox", self.wd, save_path + pid + "_" + pname + ".png")
+            self.fullpage_screenshot("firefox", self.wd, self.sc_save_path + pid + "_" + pname + ".png")
             cnt += 1
 
     def fetch_filename_from_datetime(self, ext_str):
