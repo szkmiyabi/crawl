@@ -33,6 +33,7 @@ class BayBerryBots:
         self.user_dir = expanduser('~')
         self.fx_path = '/usr/bin/firefox'
         self.ch_path = '/usr/bin/google-chrome'
+        self.sc_save_path = "pref-shiga"
         self.extends_screenshot_wait = 1
         self.wd = webdriver.Firefox(firefox_options=self.get_fx_options())
         self.wd.implicitly_wait(self.systemWait)
@@ -156,10 +157,6 @@ class BayBerryBots:
     def get_uniq_dir_name(self):
         datetime_fmt = datetime.datetime.today()
         return datetime_fmt.strftime("%Y%m%d-%H%M%S") 
-    
-    def get_save_directory(self):
-        save_path = "shiga-" + self.get_uniq_dir_name()
-        return save_path + "/"
     
     def  fullpage_screenshot(self, browser_name, driver, path):
         if browser_name == "firefox":
