@@ -73,6 +73,15 @@ class BayBerryBots:
     def shutdown(self):
         self.wd.quit()
 
+    def select_site(self):
+        ddl = self.wd.find_element_by_id("site-groups")
+        for opt in ddl.find_elements_by_tag_name("option"):
+            optval = opt.get("value")
+            opttxt = opt.text
+            if optval == "1" and opttxt.strip() == "滋賀県ホームページ":
+                opt.click()
+                break
+
     def go_sitemap(self):
         self.wd.get(self.app_url + "site_maps/frame")
     

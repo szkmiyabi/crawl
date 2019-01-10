@@ -9,6 +9,9 @@ time.sleep(bbt.midWait)
 bbt.go_sitemap()
 time.sleep(bbt.midWait)
 
+bbt.select_sites()
+time.sleep(bbt.midWait)
+
 bbt.go_sitemap_articles_list()
 time.sleep(bbt.midWait)
 
