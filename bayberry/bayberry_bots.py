@@ -34,7 +34,7 @@ class BayBerryBots:
         self.fx_path = '/usr/bin/firefox'
         self.ch_path = '/usr/bin/google-chrome'
         self.articles_file = "articles.txt"
-        self.sc_save_path = "pref-shiga"
+        self.sc_save_path = "pref-shiga/"
         self.extends_screenshot_wait = 1
         self.wd = webdriver.Firefox(firefox_options=self.get_fx_options())
         self.wd.implicitly_wait(self.systemWait)
