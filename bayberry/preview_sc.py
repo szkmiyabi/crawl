@@ -9,7 +9,7 @@ time.sleep(bbt.midWait)
 bbt.go_sitemap()
 time.sleep(bbt.midWait)
 
-bbt.select_sites()
+bbt.select_site()
 time.sleep(bbt.midWait)
 
 bbt.go_sitemap_articles_list()
