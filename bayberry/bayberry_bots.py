@@ -33,6 +33,7 @@ class BayBerryBots:
         self.user_dir = expanduser('~')
         self.fx_path = '/usr/bin/firefox'
         self.ch_path = '/usr/bin/google-chrome'
+        self.error_log = "error.txt"
         self.articles_file = "articles.txt"
         self.sc_save_path = "pref-shiga/"
         self.extends_screenshot_wait = 1
@@ -86,7 +87,7 @@ class BayBerryBots:
 
     def go_sitemap(self):
         self.wd.get(self.app_url + "site_maps/frame")
-    
+
     def go_sitemap_articles_list(self):
         self.wd.find_element_by_xpath("/html/body/div[1]/div/div[2]/ul/li/ul/li[1]/a[4]").click()
     
@@ -125,6 +126,7 @@ class BayBerryBots:
     
     def preview_page_screen_shot(self, max_limit):
         datas = self.load_articles_data()
+        self.write_article_datas(datas)
         url_base = self.app_url + "article_pages/preview?id="
         cnt = 0
         for row in datas:
@@ -159,6 +161,10 @@ class BayBerryBots:
         datetime_fmt = datetime.datetime.today()
         return datetime_fmt.strftime("%Y%m%d-%H%M%S") 
     
+    def get_save_directory(self):
+        save_path = "shiga-" + self.get_uniq_dir_name()
+        return save_path + "/"
+    
     def  fullpage_screenshot(self, browser_name, driver, path):
         if browser_name == "firefox":
             self.extends_save_screenshot(driver, path)
@@ -176,6 +182,7 @@ class BayBerryBots:
         if not os.path.exists(tmpdirpath):
             os.makedirs(tmpdirpath)
         print("一時ディレクトリ:", tmpdirpath, "を作成しました。")
+        time.sleep(self.extends_screenshot_wait)
         wd.execute_script("window.scrollTo(0, 0);")
         total_width = wd.execute_script("return document.body.scrollWidth")
         total_height = wd.execute_script("return document.body.scrollHeight")
@@ -223,3 +230,8 @@ class BayBerryBots:
         stitched_image.save(filename)
         shutil.rmtree(tmpdirpath)
         print("一時ディレクトリ:", tmpdirpath, " を削除しました。")
+
+    def write_article_datas(self):
+        with open(self.articles_file, "w") as f:
+            for r in self.fetch_articles_data():
+                f.write(r["pid"] + "\t" + r["pname"] + "\n")

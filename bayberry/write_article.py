@@ -12,8 +12,10 @@ time.sleep(bbt.midWait)
 bbt.select_site()
 time.sleep(bbt.midWait)
 
-bbt.preview_page_screen_shot(0)
+bbt.go_sitemap_articles_list()
+time.sleep(bbt.midWait)
 
+bbt.write_article_datas()
 bbt.logout()
 time.sleep(bbt.midWait)
 
