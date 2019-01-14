@@ -126,7 +126,6 @@ class BayBerryBots:
     
     def preview_page_screen_shot(self, max_limit):
         datas = self.load_articles_data()
-        self.write_article_datas(datas)
         url_base = self.app_url + "article_pages/preview?id="
         cnt = 0
         for row in datas:
