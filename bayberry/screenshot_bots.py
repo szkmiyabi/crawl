@@ -36,7 +36,7 @@ class ScreenShotBots:
             for r in f:
                 line = r.strip()
                 cols = line.split("\t")
-                datas.append({"pid": cols[0], "url": cols[1]})
+                datas.append({"pid": cols[0], "url": cols[1], "pname": cols[2]})
         return datas
 
     def get_uniq_file_name(self, ext_str):
