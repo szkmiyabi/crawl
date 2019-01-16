@@ -134,7 +134,7 @@ class BayBerryBots:
                 break
             pid = row["pid"]
             pname_tmp = row["pname"]
-            if len(pname) > self.max_fn_str_cnt:
+            if len(pname_tmp) > self.max_fn_str_cnt:
                 pname = pname_tmp[0:self.max_fn_str_cnt]
             else:
                 pname = pname_tmp
