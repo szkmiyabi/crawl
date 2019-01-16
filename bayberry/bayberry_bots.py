@@ -37,6 +37,7 @@ class BayBerryBots:
         self.articles_file = "articles.txt"
         self.sc_save_path = "pref-shiga/"
         self.extends_screenshot_wait = 1
+        self.max_fn_str_cnt = 50
         self.wd = webdriver.Firefox(firefox_options=self.get_fx_options())
         self.wd.implicitly_wait(self.systemWait)
         self.wd.set_window_size(1280, 900)
@@ -132,7 +133,11 @@ class BayBerryBots:
             if max_limit is not 0 and cnt > max_limit:
                 break
             pid = row["pid"]
-            pname = row["pname"]
+            pname_tmp = row["pname"]
+            if len(pname) > self.max_fn_str_cnt:
+                pname = pname_tmp[0:self.max_fn_str_cnt]
+            else:
+                pname = pname_tmp
             print(pid, " ", pname, " を処理しています。")
             self.wd.get(url_base + pid)
             time.sleep(self.shortWait)
